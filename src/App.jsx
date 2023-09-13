@@ -7,7 +7,6 @@ function App() {
 const [loading, setLoading] = useState(false)
 // const [city, setCity] = useState("")
 
-
 const weatherData = async () => {
   try {
     setLoading(true);
