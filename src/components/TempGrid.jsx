@@ -28,6 +28,14 @@ const TempGrid = () => {
         </div>
         <h2>32 °C</h2>
       </div>
+
+      <div className="card">
+        <div className="card-icon">
+          <FaArrowDown />
+          <small>min</small>
+        </div>
+        <h2>32 °C</h2>
+      </div>
      
     </div>
   )
