@@ -1,92 +1,94 @@
-import React, {useState, useEffect} from 'react'
-import coldImg from "./assets/cold.jpg"
-import TempGrid from './components/TempGrid'
+import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import TopButtons from "./components/TopButtons";
+import Search from "./components/Search";
+import TimeAndLocation from "./components/TimeAndLocation";
+import TempAndDetails from "./components/TempAndDetails";
+import Forecast from "./components/Forecast";
+import axios from "axios";
+import { DateTime } from "luxon";
 
 function App() {
+  const [query, setQuery] = useState("");
+  const [units, setUnits] = useState("metric");
+  const [weather, setWeather] = useState(null);
+  const [location, setLocation] = useState("");
+  const [localTime, setLocalTime] = useState("")
 
-const [loading, setLoading] = useState(false)
-// const [city, setCity] = useState("")
+  const now = DateTime.now()
 
-const weatherData = async () => {
-  try {
-    setLoading(true);
-    const key = import.meta.env.WEATHER_API_KEY;
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${key}&units=${units}`
-    )
-    console.log(response);
-   
-  } catch (error) {
-    console.error(`request has failed with status: ${response.status}`);
-  } finally {
-    setLoading(false);
-  }
+  const getWeatherData = async () => {
+    try {
+      // const url = import.meta.env.VITE_BASE_URL
+      const key = import.meta.env.VITE_API_KEY;
 
-  useEffect(()=>{
-    weatherData() 
-  }, [])
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=vienna&appid=${key}`
+      );
+
+      console.log(response.data);
+      setWeather(response.data)
+      setLocation(response.data.coord)
+
+    } catch (error) {
+      console.log("ERROR", error);
+    }
+  };
+
+  useEffect(() => {
+    getWeatherData();
+
+    setLocalTime(now.toLocaleString(DateTime.DATETIME_MED)) //get current date and time in local using luxon library
+
+    const message = query ? query : "current location"; 
+
+    toast.info("Fetching weather for " + message);
+  }, [query, units]);
+
+  
+ 
+
+  const changeBackground = () => {
+    if (!weather) return "from-slate-500 to-slate-700";
+
+    const threshold = units === "metric" ? 20 : 60;
+
+    if (weather.temp <= threshold) return "from-slate-500 to-slate-700";
+
+    return "from-yellow-400 to-orange-500";
+  };
+
+  changeBackground();
 
   return (
     <>
-  {loading ? (
-      <div className="app" style={{backgroundImage: `url(${coldImg})`}}>
-      <div className="overlay">
-        <div className="container">
-          <div className="section section_input">
-            <input type="text" name='city' placeholder='Enter City Name'/>
-            <button>°F</button>
-          </div>
-          <div className="section section_temperature">
-            <div className="icon">
-              <h3>London, GB</h3>
-              <img src="" alt="weather icon" />
-              <h3>Cloudy</h3>
-            </div>
-            <div className="temperature">
-              <h1>34 °C</h1>
-            </div>
-          </div>
-          {/* bottom section with grid */}
-          <TempGrid />
-  
-        </div>
-      </div>
-        
-      </div>
-  ) : null}
+      <div
+        className={`mx-auto max-w-screen-md mt-4 py-5 px-32 bg-gradient-to-br from-slate-500 to-slate-700 h-fit shadow-xl shadow-gray-400 ${changeBackground()}`}
+      >
+        <TopButtons setQuery={setQuery} />
+        <Search setQuery={setQuery} units={units} setUnits={setUnits} />
 
-  
-      {/* {loading ? (
-        <div>
-          <div className="container">
-            <h1 className="header">Weather App</h1>
-          </div>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Search city"
-              value={input.value}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-            />
-            <button className="btn" type="submit">
-              Search
-            </button>
-          </form>
-          <div className="temp">
-            <div>Feels like</div>
-          </div>
-          <div className="wind">
-            <div>Wind speed</div>
-          </div>
-          <div className="humid">
-            <div>Humidity</div>
-          </div>
-        </div>
-      ) : null} */}
+        <TimeAndLocation localTime={localTime} />
+        <TempAndDetails weather={weather} />
+
+        <Forecast title="hourly forecast" />
+        <Forecast title="daily forecast" />
+
+        {/* {weather && (
+          <>
+            <TimeAndLocation weather={weather} />
+            <TempAndDetails weather={weather} />
+
+            <Forecast title="hourly forecast" />
+            <Forecast title="daily forecast" />
+          </>
+        )} */}
+
+        <ToastContainer autoClose={5000} theme="colored" newestOnTop={true} />
+      </div>
     </>
   );
 }
-}
 
-export default App
+export default App;
