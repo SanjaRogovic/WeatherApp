@@ -1,18 +1,16 @@
 import React from 'react'
 
-const Display = ({weather}) => {
+const Display = ({weather, localTime}) => {
   return (
-    <>
+    <> 
 
-    {weather ? 
     <div>
-        <h2>Location: {weather.city}</h2>
-        <p>{weather.country}</p>
-        <p>{weather.description}</p>
+        {/* <h2>{weather.city}</h2> */}
+        {/* <p>{weather.country}</p>
+        <p>{localTime}</p>
+        <p>{weather.description}</p> */}
     </div>
 
-     : null}
-    
     </>
     
   )
